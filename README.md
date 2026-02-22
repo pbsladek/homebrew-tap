@@ -54,6 +54,11 @@ Ruby checks:
 - Format (write): `.github/scripts/ruby-fmt.sh write`
 - Format (check only): `.github/scripts/ruby-fmt.sh check`
 
+Unified local checks:
+
+- `make lint` for Bash + Ruby lint and format checks
+- `make fmt` to apply Bash + Ruby formatting
+
 ### Trigger release validation from another repo
 
 From your release workflow in `pbsladek/ai-mr-comment`, send a dispatch event:

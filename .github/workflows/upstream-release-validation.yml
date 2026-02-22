@@ -20,12 +20,18 @@ on:
         description: Source tarball SHA256
         required: true
 
-permissions:
-  contents: read
-
 jobs:
   validate-upstream-release:
+    permissions:
+      contents: read
     runs-on: macos-latest
+    outputs:
+      formula: ${{ steps.validate.outputs.formula }}
+      version: ${{ steps.validate.outputs.version }}
+      src_url: ${{ steps.validate.outputs.src_url }}
+      src_sha256: ${{ steps.validate.outputs.src_sha256 }}
+      formula_file: ${{ steps.validate.outputs.formula_file }}
+      changed: ${{ steps.validate.outputs.changed }}
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_FROM_API: 1
@@ -42,6 +48,49 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Validate upstream release against tap
+      - name: Validate upstream release
+        id: validate
+        env:
+          RUN_BREW_CHECKS: "true"
+          APPLY_FORMULA_CHANGES: "false"
         run: .github/scripts/upstream-release-validation.sh
+
+  open-formula-pr:
+    needs: validate-upstream-release
+    if: ${{ needs.validate-upstream-release.outputs.changed == 'true' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Open or update formula bump PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORMULA: ${{ needs.validate-upstream-release.outputs.formula }}
+          VERSION: ${{ needs.validate-upstream-release.outputs.version }}
+          SRC_URL: ${{ needs.validate-upstream-release.outputs.src_url }}
+          SRC_SHA256: ${{ needs.validate-upstream-release.outputs.src_sha256 }}
+          FORMULA_FILE: ${{ needs.validate-upstream-release.outputs.formula_file }}
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          ASSIGNEE: pbsladek
+        run: .github/scripts/open-upstream-release-pr.sh
+
+  no-formula-change:
+    needs: validate-upstream-release
+    if: ${{ needs.validate-upstream-release.outputs.changed != 'true' }}
+    permissions:
+      contents: read
+    runs-on: macos-latest
+    steps:
+      - name: No formula change required
+        run: echo "Formula already up to date; no PR created."
