@@ -2,18 +2,15 @@
 # frozen_string_literal: true
 
 require "json"
+require "digest"
 require "open3"
-
-def fail!(message)
-  warn message
-  exit 1
-end
+require_relative "lib/script_helpers"
 
 def run_cmd!(*cmd)
   stdout, stderr, status = Open3.capture3(*cmd)
   unless status.success?
     if stderr.include?("GitHub Actions is not permitted to create or approve pull requests")
-      fail!(<<~MSG)
+      ScriptHelpers.fail!(<<~MSG)
         #{stderr}
         PR creation is blocked for the current token.
         Fix one of:
@@ -23,7 +20,7 @@ def run_cmd!(*cmd)
       MSG
     end
     warn stderr unless stderr.empty?
-    fail!("Command failed: #{cmd.join(' ')}")
+    ScriptHelpers.fail!("Command failed: #{cmd.join(' ')}")
   end
   stdout
 end
@@ -34,12 +31,12 @@ end
 
 def env_required(name)
   value = ENV[name]
-  fail!("Missing required env: #{name}") if value.nil? || value.empty?
+  ScriptHelpers.fail!("Missing required env: #{name}") if value.nil? || value.empty?
   normalize(value)
 end
 
 def validate!(label, value, regex)
-  fail!("Invalid #{label}: #{value}") unless value.match?(regex)
+  ScriptHelpers.fail!("Invalid #{label}: #{value}") unless value.match?(regex)
 end
 
 formula = env_required("FORMULA")
@@ -50,29 +47,45 @@ src_sha256 = env_required("SRC_SHA256")
 base_branch = env_required("BASE_BRANCH")
 assignee = normalize(ENV.fetch("ASSIGNEE", ""))
 
-%w[git gh].each do |tool|
-  run_cmd!("which", tool)
-end
+%w[git gh].each { |tool| ScriptHelpers.ensure_tool!(tool) }
 
 validate!("FORMULA", formula, /\A[a-z0-9][a-z0-9+_.-]*\z/)
-fail!("Unexpected FORMULA_FILE path: #{formula_file}") unless formula_file == "Formula/#{formula}.rb"
+ScriptHelpers.fail!("Unexpected FORMULA_FILE path: #{formula_file}") unless formula_file == "Formula/#{formula}.rb"
 validate!("VERSION", version, /\Av[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)*\z/)
 validate!("SRC_SHA256", src_sha256, /\A[A-Fa-f0-9]{64}\z/)
 validate!("BASE_BRANCH", base_branch, /\A[A-Za-z0-9._\/-]+\z/)
 validate!("ASSIGNEE", assignee, /\A[A-Za-z0-9-]+\z/) unless assignee.empty?
 
 url_regex = %r{\Ahttps://github\.com/pbsladek/ai-mr-comment/archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)*\.tar\.gz\z}
-fail!("URL is not in the allowed source list: #{src_url}") unless src_url.match?(url_regex)
+ScriptHelpers.fail!("URL is not in the allowed source list: #{src_url}") unless src_url.match?(url_regex)
 
 expected_url = "https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/#{version}.tar.gz"
 if src_url != expected_url
-  fail!("URL/version mismatch. Expected URL: #{expected_url}; provided URL: #{src_url}")
+  ScriptHelpers.fail!("URL/version mismatch. Expected URL: #{expected_url}; provided URL: #{src_url}")
 end
 
 safe_version = version.gsub(/[^[:alnum:]._-]/, "-")
-branch = "automation/bump-#{formula}-#{safe_version}"
+branch_prefix = "automation/bump-#{formula}-"
+max_branch_len = 120
+remaining = max_branch_len - branch_prefix.length
+ScriptHelpers.fail!("Generated branch prefix is too long: #{branch_prefix}") if remaining < 12
+
+if safe_version.length > remaining
+  suffix = Digest::SHA256.hexdigest(version)[0, 8]
+  keep = remaining - suffix.length - 1
+  safe_version = "#{safe_version[0, keep]}-#{suffix}"
+end
+branch = "#{branch_prefix}#{safe_version}"
+
 title = "chore(formula): bump #{formula} to #{version}"
 run_url = "#{ENV.fetch('GITHUB_SERVER_URL', 'https://github.com')}/#{ENV.fetch('GITHUB_REPOSITORY', 'pbsladek/homebrew-tap')}/actions/runs/#{ENV.fetch('GITHUB_RUN_ID', 'unknown')}"
+metadata_footer = <<~FOOTER
+  Release-Tag: #{version}
+  Source-URL: #{src_url}
+  Source-SHA256: #{src_sha256}
+  Workflow-Run: #{run_url}
+FOOTER
+
 body = <<~BODY
   Automated formula update from upstream release metadata.
 
@@ -82,6 +95,9 @@ body = <<~BODY
   - Source URL: `#{src_url}`
   - SHA256: `#{src_sha256}`
   - Workflow run: #{run_url}
+
+  Metadata:
+  #{metadata_footer}
 BODY
 
 run_cmd!("git", "config", "user.name", "github-actions[bot]")
@@ -91,7 +107,7 @@ run_cmd!("git", "checkout", "-B", branch, "origin/#{base_branch}")
 
 content = File.read(formula_file)
 unless content.match?(/^\s*url\s*".*"\s*$/) && content.match?(/^\s*sha256\s*".*"\s*$/)
-  fail!("Could not find url/sha256 fields in #{formula_file}")
+  ScriptHelpers.fail!("Could not find url/sha256 fields in #{formula_file}")
 end
 
 updated = content
@@ -107,7 +123,7 @@ if status.success?
   exit 0
 end
 
-run_cmd!("git", "commit", "-m", title)
+run_cmd!("git", "commit", "-m", title, "-m", metadata_footer)
 run_cmd!("git", "push", "--force-with-lease", "--set-upstream", "origin", branch)
 
 pr_json = run_cmd!("gh", "pr", "list", "--head", branch, "--base", base_branch, "--json", "number")

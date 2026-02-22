@@ -53,10 +53,10 @@ ruby-script-lint:
 	fi
 
 ruby-lint:
-	@.github/scripts/ruby-lint.sh
+	@.github/scripts/ruby-lint.rb
 
 ruby-fmt-check:
-	@.github/scripts/ruby-fmt.sh check
+	@.github/scripts/ruby-fmt.rb check
 
 ruby-fmt:
-	@.github/scripts/ruby-fmt.sh write
+	@.github/scripts/ruby-fmt.rb write
