@@ -1,0 +1,44 @@
+name: Upstream Release Validation
+
+on:
+  repository_dispatch:
+    types:
+      - upstream_release
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: Formula name (without .rb)
+        required: true
+        default: ai-mr-comment
+      version:
+        description: Release tag (for example v0.8.0)
+        required: true
+      url:
+        description: Source tarball URL for that tag
+        required: true
+      sha256:
+        description: Source tarball SHA256
+        required: true
+
+jobs:
+  validate-upstream-release:
+    runs-on: macos-latest
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_FROM_API: 1
+      TAP_NAME: pbsladek/tap
+      EVENT_NAME: ${{ github.event_name }}
+      INPUT_FORMULA: ${{ github.event.inputs.formula }}
+      INPUT_VERSION: ${{ github.event.inputs.version }}
+      INPUT_URL: ${{ github.event.inputs.url }}
+      INPUT_SHA256: ${{ github.event.inputs.sha256 }}
+      PAYLOAD_FORMULA: ${{ github.event.client_payload.formula }}
+      PAYLOAD_VERSION: ${{ github.event.client_payload.version }}
+      PAYLOAD_URL: ${{ github.event.client_payload.url }}
+      PAYLOAD_SHA256: ${{ github.event.client_payload.sha256 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate upstream release against tap
+        run: .github/scripts/upstream-release-validation.sh

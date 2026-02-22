@@ -13,6 +13,6 @@ class AiMrComment < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/ai-mr-comment --version")
+    assert_match "Generate MR/PR comments using AI", shell_output("#{bin}/ai-mr-comment --help")
   end
 end

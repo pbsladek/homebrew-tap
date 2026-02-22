@@ -32,6 +32,37 @@ brew install pbsladek/tap/ai-mr-comment
 
 Each tool should have a dedicated file in `Formula/` named `<formula>.rb`.
 
+## CI Validation
+
+This tap includes GitHub Actions workflows for:
+
+- push/PR checks on this repo: Ruby style/lint, audit, and build-from-source install
+- upstream release validation: triggered from another repo via `repository_dispatch`
+
+Workflow logic is implemented in repo scripts:
+
+- `.github/scripts/tap-ci.sh`
+- `.github/scripts/upstream-release-validation.sh`
+
+### Trigger release validation from another repo
+
+From your release workflow in `pbsladek/ai-mr-comment`, send a dispatch event:
+
+```yaml
+- name: Validate Homebrew tap release payload
+  env:
+    GH_TOKEN: ${{ secrets.HOMEBREW_TAP_DISPATCH_TOKEN }}
+  run: |
+    gh api repos/pbsladek/homebrew-tap/dispatches \
+      -f event_type=upstream_release \
+      -f client_payload[formula]=ai-mr-comment \
+      -f client_payload[version]=${{ github.ref_name }} \
+      -f client_payload[url]=https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/${{ github.ref_name }}.tar.gz \
+      -f client_payload[sha256]=${{ needs.build.outputs.source_sha256 }}
+```
+
+`HOMEBREW_TAP_DISPATCH_TOKEN` should be a fine-grained PAT with access to trigger Actions in this repo.
+
 ## Add Another Project Later
 
 1. Create `Formula/<name>.rb` with a `class <Name> < Formula`.
