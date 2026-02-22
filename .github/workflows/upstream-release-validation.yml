@@ -72,10 +72,11 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+          token: ${{ secrets.HOMEBREW_TAP_PR_TOKEN != '' && secrets.HOMEBREW_TAP_PR_TOKEN || github.token }}
 
       - name: Open or update formula bump PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_PR_TOKEN != '' && secrets.HOMEBREW_TAP_PR_TOKEN || secrets.GITHUB_TOKEN }}
           FORMULA: ${{ needs.validate-upstream-release.outputs.formula }}
           VERSION: ${{ needs.validate-upstream-release.outputs.version }}
           SRC_URL: ${{ needs.validate-upstream-release.outputs.src_url }}

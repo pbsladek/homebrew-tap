@@ -12,6 +12,16 @@ end
 def run_cmd!(*cmd)
   stdout, stderr, status = Open3.capture3(*cmd)
   unless status.success?
+    if stderr.include?("GitHub Actions is not permitted to create or approve pull requests")
+      fail!(<<~MSG)
+        #{stderr}
+        PR creation is blocked for the current token.
+        Fix one of:
+        1) Repository Settings > Actions > General > Workflow permissions:
+           enable "Allow GitHub Actions to create and approve pull requests".
+        2) Set secret HOMEBREW_TAP_PR_TOKEN to a PAT with repo contents+pull_request write access.
+      MSG
+    end
     warn stderr unless stderr.empty?
     fail!("Command failed: #{cmd.join(' ')}")
   end

@@ -79,6 +79,9 @@ From your release workflow in `pbsladek/ai-mr-comment`, send a dispatch event:
 
 `HOMEBREW_TAP_DISPATCH_TOKEN` should be a fine-grained PAT with access to trigger Actions in this repo.
 
+If PR creation is blocked for `GITHUB_TOKEN`, add `HOMEBREW_TAP_PR_TOKEN` (fine-grained PAT with contents + pull requests write access) or enable:
+Settings -> Actions -> General -> Workflow permissions -> "Allow GitHub Actions to create and approve pull requests".
+
 ## Add Another Project Later
 
 1. Create `Formula/<name>.rb` with a `class <Name> < Formula`.
