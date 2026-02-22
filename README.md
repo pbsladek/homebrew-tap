@@ -45,6 +45,7 @@ Workflow logic is implemented in repo scripts:
 - `.github/scripts/upstream-release-validation.sh`
 - `.github/scripts/ruby-lint.sh`
 - `.github/scripts/ruby-fmt.sh`
+- `.github/scripts/open-upstream-release-pr.rb`
 
 The upstream release validation script currently allows dispatch validation only for `ai-mr-comment` and its GitHub source tarball URL pattern.
 

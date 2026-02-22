@@ -83,7 +83,7 @@ jobs:
           FORMULA_FILE: ${{ needs.validate-upstream-release.outputs.formula_file }}
           BASE_BRANCH: ${{ github.event.repository.default_branch }}
           ASSIGNEE: pbsladek
-        run: .github/scripts/open-upstream-release-pr.sh
+        run: .github/scripts/open-upstream-release-pr.rb
 
   no-formula-change:
     needs: validate-upstream-release
