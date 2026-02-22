@@ -22,10 +22,13 @@ fi
 
 echo "Found formulae: ${formulae}"
 
-for f in ${formulae}; do
-  echo "brew style Formula/${f}.rb"
-  brew style "Formula/${f}.rb"
+echo "Running Ruby format check"
+.github/scripts/ruby-fmt.sh check
 
+echo "Running Ruby lint"
+.github/scripts/ruby-lint.sh
+
+for f in ${formulae}; do
   echo "brew audit --strict --online ${tap_name}/${f}"
   brew audit --strict --online "${tap_name}/${f}"
 
