@@ -44,6 +44,8 @@ Workflow logic is implemented in repo scripts:
 - `.github/scripts/tap-ci.sh`
 - `.github/scripts/upstream-release-validation.sh`
 
+The upstream release validation script currently allows dispatch validation only for `ai-mr-comment` and its GitHub source tarball URL pattern.
+
 ### Trigger release validation from another repo
 
 From your release workflow in `pbsladek/ai-mr-comment`, send a dispatch event:

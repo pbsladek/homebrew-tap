@@ -26,6 +26,45 @@ if [ -z "${formula}" ] || [ -z "${version}" ] || [ -z "${src_url}" ] || [ -z "${
   exit 1
 fi
 
+if ! [[ "${tap_name}" =~ ^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$ ]]; then
+  echo "Invalid TAP_NAME: ${tap_name}"
+  exit 1
+fi
+
+if ! [[ "${formula}" =~ ^[a-z0-9][a-z0-9+_.-]*$ ]]; then
+  echo "Invalid formula name: ${formula}"
+  exit 1
+fi
+
+if [ "${formula}" != "ai-mr-comment" ]; then
+  echo "Formula is not in the allowed release-dispatch list: ${formula}"
+  exit 1
+fi
+
+if ! [[ "${version}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)*$ ]]; then
+  echo "Invalid version format: ${version}"
+  exit 1
+fi
+
+if ! [[ "${src_sha256}" =~ ^[A-Fa-f0-9]{64}$ ]]; then
+  echo "Invalid sha256 format."
+  exit 1
+fi
+
+url_regex='^https://github\.com/pbsladek/ai-mr-comment/archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)*\.tar\.gz$'
+if ! [[ "${src_url}" =~ ${url_regex} ]]; then
+  echo "URL is not in the allowed source list: ${src_url}"
+  exit 1
+fi
+
+expected_url="https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/${version}.tar.gz"
+if [ "${src_url}" != "${expected_url}" ]; then
+  echo "URL/version mismatch."
+  echo "Expected URL: ${expected_url}"
+  echo "Provided URL: ${src_url}"
+  exit 1
+fi
+
 actual_sha256="$(curl -fsSL "${src_url}" | shasum -a 256 | awk '{print $1}')"
 if [ "${actual_sha256}" != "${src_sha256}" ]; then
   echo "SHA mismatch for upstream source tarball."

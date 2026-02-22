@@ -4,6 +4,11 @@ set -euo pipefail
 tap_name="${TAP_NAME:-pbsladek/tap}"
 workspace="${GITHUB_WORKSPACE:-$PWD}"
 
+if ! [[ "${tap_name}" =~ ^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$ ]]; then
+  echo "Invalid TAP_NAME: ${tap_name}"
+  exit 1
+fi
+
 if brew tap | grep -qx "${tap_name}"; then
   brew untap --force "${tap_name}"
 fi
