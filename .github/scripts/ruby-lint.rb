@@ -3,13 +3,17 @@
 
 require_relative "lib/script_helpers"
 
-ruby_files = Dir.glob("Formula/*.rb").sort
+def run_lint!
+  ruby_files = Dir.glob("Formula/*.rb").sort
 
-if ruby_files.empty?
-  ScriptHelpers.fail!("No Ruby files found under Formula/.")
+  if ruby_files.empty?
+    ScriptHelpers.fail!("No Ruby files found under Formula/.")
+  end
+
+  puts "Linting Ruby files: #{ruby_files.join(' ')}"
+  ruby_files.each do |file|
+    ScriptHelpers.run_cmd!("brew", "style", file)
+  end
 end
 
-puts "Linting Ruby files: #{ruby_files.join(' ')}"
-ruby_files.each do |file|
-  ScriptHelpers.run_cmd!("brew", "style", file)
-end
+run_lint! if __FILE__ == $PROGRAM_NAME
