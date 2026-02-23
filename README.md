@@ -41,7 +41,7 @@ This tap includes GitHub Actions workflows for:
 
 Workflow logic is implemented in repo scripts:
 
-- `.github/scripts/upstream-release-validation.sh`
+- `.github/scripts/upstream-release-validation.rb`
 - `.github/scripts/tap-ci.rb`
 - `.github/scripts/ruby-lint.rb`
 - `.github/scripts/ruby-fmt.rb`

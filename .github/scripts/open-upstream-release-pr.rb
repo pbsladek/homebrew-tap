@@ -51,12 +51,12 @@ assignee = normalize(ENV.fetch("ASSIGNEE", ""))
 
 validate!("FORMULA", formula, /\A[a-z0-9][a-z0-9+_.-]*\z/)
 ScriptHelpers.fail!("Unexpected FORMULA_FILE path: #{formula_file}") unless formula_file == "Formula/#{formula}.rb"
-validate!("VERSION", version, /\Av[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)*\z/)
+validate!("VERSION", version, /\Av[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z]+)*\z/)
 validate!("SRC_SHA256", src_sha256, /\A[A-Fa-f0-9]{64}\z/)
 validate!("BASE_BRANCH", base_branch, /\A[A-Za-z0-9._\/-]+\z/)
 validate!("ASSIGNEE", assignee, /\A[A-Za-z0-9-]+\z/) unless assignee.empty?
 
-url_regex = %r{\Ahttps://github\.com/pbsladek/ai-mr-comment/archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)*\.tar\.gz\z}
+url_regex = %r{\Ahttps://github\.com/pbsladek/ai-mr-comment/archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z]+)*\.tar\.gz\z}
 ScriptHelpers.fail!("URL is not in the allowed source list: #{src_url}") unless src_url.match?(url_regex)
 
 expected_url = "https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/#{version}.tar.gz"

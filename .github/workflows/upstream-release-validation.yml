@@ -57,7 +57,7 @@ jobs:
         env:
           RUN_BREW_CHECKS: "true"
           APPLY_FORMULA_CHANGES: "false"
-        run: .github/scripts/upstream-release-validation.sh
+        run: .github/scripts/upstream-release-validation.rb
 
   open-formula-pr:
     needs: validate-upstream-release
