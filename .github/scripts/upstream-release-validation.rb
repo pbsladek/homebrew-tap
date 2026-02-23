@@ -14,21 +14,17 @@ run_brew_checks = ENV.fetch('RUN_BREW_CHECKS', 'true') == 'true'
 apply_formula_changes = ENV.fetch('APPLY_FORMULA_CHANGES', 'false') == 'true'
 changed = 'false'
 
-formula, version, src_url, src_sha256 = if event_name == 'workflow_dispatch'
-                                          [
-                                            ENV['INPUT_FORMULA'],
-                                            ENV['INPUT_VERSION'],
-                                            ENV['INPUT_URL'],
-                                            ENV['INPUT_SHA256']
-                                          ]
-                                        else
-                                          [
-                                            ENV.fetch('PAYLOAD_FORMULA', 'ai-mr-comment'),
-                                            ENV['PAYLOAD_VERSION'],
-                                            ENV['PAYLOAD_URL'],
-                                            ENV['PAYLOAD_SHA256']
-                                          ]
-                                        end
+if event_name == 'workflow_dispatch'
+  formula = ENV['INPUT_FORMULA']
+  version = ENV['INPUT_VERSION']
+  src_url = ENV['INPUT_URL']
+  src_sha256 = ENV['INPUT_SHA256']
+else
+  formula = ENV.fetch('PAYLOAD_FORMULA', 'ai-mr-comment')
+  version = ENV['PAYLOAD_VERSION']
+  src_url = ENV['PAYLOAD_URL']
+  src_sha256 = ENV['PAYLOAD_SHA256']
+end
 
 if formula.nil? || formula.empty? || version.nil? || version.empty? ||
    src_url.nil? || src_url.empty? || src_sha256.nil? || src_sha256.empty?
