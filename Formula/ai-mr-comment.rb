@@ -1,8 +1,8 @@
 class AiMrComment < Formula
   desc "Generate AI-powered MR/PR comments from git diffs"
   homepage "https://github.com/pbsladek/ai-mr-comment"
-  url "https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/v0.18.1.tar.gz"
-  sha256 "9beb3d3ef7e5fd79855d7ed48a8532c137ecb08de3030084f2aeff63ef307d53"
+  url "https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/v0.18.3.tar.gz"
+  sha256 "79c7c6a692bfcc448dada7091f7d7c9bf426b3a4975ea2c43e7a50125e896859"
   license "MIT"
 
   depends_on "go" => :build
