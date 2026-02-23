@@ -41,19 +41,19 @@ This tap includes GitHub Actions workflows for:
 
 Workflow logic is implemented in repo scripts:
 
-- `.github/scripts/tap-ci.sh`
 - `.github/scripts/upstream-release-validation.sh`
-- `.github/scripts/ruby-lint.sh`
-- `.github/scripts/ruby-fmt.sh`
+- `.github/scripts/tap-ci.rb`
+- `.github/scripts/ruby-lint.rb`
+- `.github/scripts/ruby-fmt.rb`
 - `.github/scripts/open-upstream-release-pr.rb`
 
 The upstream release validation script currently allows dispatch validation only for `ai-mr-comment` and its GitHub source tarball URL pattern.
 
 Ruby checks:
 
-- Lint: `.github/scripts/ruby-lint.sh`
-- Format (write): `.github/scripts/ruby-fmt.sh write`
-- Format (check only): `.github/scripts/ruby-fmt.sh check`
+- Lint: `.github/scripts/ruby-lint.rb`
+- Format (write): `.github/scripts/ruby-fmt.rb write`
+- Format (check only): `.github/scripts/ruby-fmt.rb check`
 
 Unified local checks:
 
