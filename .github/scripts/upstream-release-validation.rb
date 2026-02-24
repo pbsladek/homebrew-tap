@@ -19,11 +19,15 @@ if event_name == 'workflow_dispatch'
   version = ENV['INPUT_VERSION']
   src_url = ENV['INPUT_URL']
   src_sha256 = ENV['INPUT_SHA256']
+  commit = ''
+  commit_full = ''
 else
   formula = ENV.fetch('PAYLOAD_FORMULA', 'ai-mr-comment')
   version = ENV['PAYLOAD_VERSION']
   src_url = ENV['PAYLOAD_URL']
   src_sha256 = ENV['PAYLOAD_SHA256']
+  commit = ENV.fetch('PAYLOAD_COMMIT', '')
+  commit_full = ENV.fetch('PAYLOAD_COMMIT_FULL', '')
 end
 
 if formula.nil? || formula.empty? || version.nil? || version.empty? ||
@@ -127,5 +131,7 @@ if ENV['GITHUB_OUTPUT'] && !ENV['GITHUB_OUTPUT'].empty?
     f.puts "src_sha256=#{src_sha256}"
     f.puts "formula_file=#{formula_file}"
     f.puts "changed=#{changed}"
+    f.puts "commit=#{commit}"
+    f.puts "commit_full=#{commit_full}"
   end
 end

@@ -8,8 +8,13 @@ class AiMrComment < Formula
   depends_on "go" => :build
 
   def install
-    ldflags = "-s -w -X main.Version=#{version}"
-    system "go", "build", *std_go_args(ldflags:), "."
+    ldflags = %W[
+      -s -w
+      -X main.Version=#{version}
+      -X main.Commit=6225fbd
+      -X main.CommitFull=6225fbd4a88560b9a0b1668516b69b9bd2d3aaa8
+    ]
+    system "go", "build", *std_go_args(ldflags: ldflags.join(" ")), "."
   end
 
   test do
