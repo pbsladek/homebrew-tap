@@ -46,6 +46,8 @@ src_url = env_required("SRC_URL")
 src_sha256 = env_required("SRC_SHA256")
 base_branch = env_required("BASE_BRANCH")
 assignee = normalize(ENV.fetch("ASSIGNEE", ""))
+commit = normalize(ENV.fetch("COMMIT", "unknown"))
+commit_full = normalize(ENV.fetch("COMMIT_FULL", "unknown"))
 
 %w[git gh].each { |tool| ScriptHelpers.ensure_tool!(tool) }
 
@@ -55,6 +57,8 @@ validate!("VERSION", version, /\Av[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z]+)*\z/)
 validate!("SRC_SHA256", src_sha256, /\A[A-Fa-f0-9]{64}\z/)
 validate!("BASE_BRANCH", base_branch, /\A[A-Za-z0-9._\/-]+\z/)
 validate!("ASSIGNEE", assignee, /\A[A-Za-z0-9-]+\z/) unless assignee.empty?
+validate!("COMMIT", commit, /\A(?:[A-Fa-f0-9]{7,40}|unknown)\z/)
+validate!("COMMIT_FULL", commit_full, /\A(?:[A-Fa-f0-9]{40}|unknown)\z/)
 
 url_regex = %r{\Ahttps://github\.com/pbsladek/ai-mr-comment/archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z]+)*\.tar\.gz\z}
 ScriptHelpers.fail!("URL is not in the allowed source list: #{src_url}") unless src_url.match?(url_regex)
@@ -83,6 +87,8 @@ metadata_footer = <<~FOOTER
   Release-Tag: #{version}
   Source-URL: #{src_url}
   Source-SHA256: #{src_sha256}
+  Commit: #{commit}
+  Commit-Full: #{commit_full}
   Workflow-Run: #{run_url}
 FOOTER
 
@@ -94,6 +100,7 @@ body = <<~BODY
   - File: `#{formula_file}`
   - Source URL: `#{src_url}`
   - SHA256: `#{src_sha256}`
+  - Commit: `#{commit}`
   - Workflow run: #{run_url}
 
   Metadata:
@@ -113,6 +120,8 @@ end
 updated = content
   .sub(/^(\s*url\s*)".*?"(\s*)$/, "\\1\"#{src_url}\"\\2")
   .sub(/^(\s*sha256\s*)".*?"(\s*)$/, "\\1\"#{src_sha256}\"\\2")
+  .sub(/(-X main\.Commit=)[^\s"]+/, "\\1#{commit}")
+  .sub(/(-X main\.CommitFull=)[^\s"]+/, "\\1#{commit_full}")
 
 File.write(formula_file, updated)
 run_cmd!("git", "add", formula_file)

@@ -32,6 +32,8 @@ jobs:
       src_sha256: ${{ steps.validate.outputs.src_sha256 }}
       formula_file: ${{ steps.validate.outputs.formula_file }}
       changed: ${{ steps.validate.outputs.changed }}
+      commit: ${{ steps.validate.outputs.commit }}
+      commit_full: ${{ steps.validate.outputs.commit_full }}
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_FROM_API: 1
@@ -45,6 +47,8 @@ jobs:
       PAYLOAD_VERSION: ${{ github.event.client_payload.version }}
       PAYLOAD_URL: ${{ github.event.client_payload.url }}
       PAYLOAD_SHA256: ${{ github.event.client_payload.sha256 }}
+      PAYLOAD_COMMIT: ${{ github.event.client_payload.commit }}
+      PAYLOAD_COMMIT_FULL: ${{ github.event.client_payload.commit_full }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -82,6 +86,8 @@ jobs:
           SRC_URL: ${{ needs.validate-upstream-release.outputs.src_url }}
           SRC_SHA256: ${{ needs.validate-upstream-release.outputs.src_sha256 }}
           FORMULA_FILE: ${{ needs.validate-upstream-release.outputs.formula_file }}
+          COMMIT: ${{ needs.validate-upstream-release.outputs.commit }}
+          COMMIT_FULL: ${{ needs.validate-upstream-release.outputs.commit_full }}
           BASE_BRANCH: ${{ github.event.repository.default_branch }}
           ASSIGNEE: pbsladek
         run: .github/scripts/open-upstream-release-pr.rb
