@@ -1,8 +1,8 @@
 class AiMrComment < Formula
   desc "Generate AI-powered MR/PR comments from git diffs"
   homepage "https://github.com/pbsladek/ai-mr-comment"
-  url "https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/v1.4.5.tar.gz"
-  sha256 "cb07a1ce7733b8d29f1eb549ad9634a68ce94320eb2e4d6ac3fde7f588b3b5e4"
+  url "https://github.com/pbsladek/ai-mr-comment/archive/refs/tags/v1.6.1.tar.gz"
+  sha256 "97855e23c01689e84f1df2ec5683c3a3228aff3f19cb4f748a36924701517718"
   license "MIT"
 
   depends_on "go" => :build
@@ -11,8 +11,8 @@ class AiMrComment < Formula
     ldflags = %W[
       -s -w
       -X main.Version=#{version}
-      -X main.Commit=f02676a
-      -X main.CommitFull=f02676a2ff377fdd565cd9d3c51cfc9ff5d3732f
+      -X main.Commit=f4e07a8
+      -X main.CommitFull=f4e07a82da5ad8484d3db3a8bdee453b407cc925
     ]
     system "go", "build", *std_go_args(ldflags: ldflags.join(" ")), "."
   end
